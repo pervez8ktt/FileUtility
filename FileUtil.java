@@ -8,6 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
+
 
 public class FileUtil {
 
@@ -116,5 +129,61 @@ public class FileUtil {
 	       ex.printStackTrace();
 	    }
 	   }
+	
+	public static String uploadFile(MultipartFile file) throws IOException{
+		
+			String path = getRootPath();
+			String filePath =null;
+		
+			byte[] bytes = file.getBytes();
+			File directoryPath = new File(path);
+			System.out.println("path: "+path);
+			
+			if(!directoryPath.exists()){
+				directoryPath.mkdir();
+			}
+		
+			String rootPath = directoryPath.getAbsolutePath();
+			filePath = "/" + (new Date()).getTime() + "-"
+					+ file.getOriginalFilename();
+			
+			File uploadFile = new File(rootPath + filePath);
+			FileOutputStream out = new FileOutputStream(uploadFile);
+			BufferedOutputStream outputStream = new BufferedOutputStream(out);
+			outputStream.write(bytes);
+			outputStream.close();
+			
+			return filePath;
+		
+	}
+	
+	public static void downloadFile(HttpServletRequest request,
+			HttpServletResponse response, String fileName) throws IOException{
+		
+		String path = getRootPath();	
+	
+		File file = new File(path);
+		String rootPath = file.getAbsolutePath();
+		
+		response.setContentType("application/octet-stream");
+		PrintWriter out;
+		try {
+			out = response.getWriter();
+		
+		String filename = rootPath+fileName;
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+		//String filepath = message.getAbb();
+		FileInputStream fileInputStream = new FileInputStream(filename);
+		int i;
+		while ((i = fileInputStream.read()) != -1) {
+			out.write(i);
+		}
+		fileInputStream.close();
+		out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
 
 }
