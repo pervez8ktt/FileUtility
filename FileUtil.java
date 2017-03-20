@@ -1,4 +1,4 @@
-package com.ds4u.project.utils;
+package com.project.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
